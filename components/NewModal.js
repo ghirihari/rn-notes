@@ -17,7 +17,7 @@ export default function NewModal(props) {
                     <Text style={styles.textStyle}>New Note</Text>
 
                 </Pressable>
-                <Pressable style={[styles.button,{backgroundColor:'#fc594d'}]} onPress={() => {props.setModalVisible((modalVisible)=>!modalVisible); props.navigate('Task')}}>
+                <Pressable style={[styles.button,{backgroundColor:'#fc594d'}]} onPress={() => {props.setModalVisible((modalVisible)=>!modalVisible); /*props.navigate('Task')*/}}>
                     <Icon name='tasks' size={50} style={styles.icon}/>
                     <Text style={styles.textStyle}>Task List</Text>
                 </Pressable>

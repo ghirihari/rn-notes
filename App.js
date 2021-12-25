@@ -22,8 +22,9 @@ const db = SQLite.openDatabase("db.db");
 
 const createTable = () => {
   db.transaction((tx) => {
-      tx.executeSql("create table if not exists Notes (id integer primary key autoincrement, title text, note text, date text, label_id integer, FOREIGN KEY(label_id) REFERENCES Labels(id));");
+      tx.executeSql("create table if not exists Notes (id integer primary key autoincrement,type text, title text, note text, date text, label_id integer, FOREIGN KEY(label_id) REFERENCES Labels(id));");
       tx.executeSql("create table if not exists Labels (id integer primary key autoincrement, name text, color text);")
+      // tx.executeSql("drop table Notes;")
     },
     (err)=>console.log(err),
     ()=>console.log('success')

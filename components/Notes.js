@@ -21,12 +21,13 @@ export default function Notes({ navigation }) {
     const fetch = () =>{
         db.transaction(
           (tx) => {
-            tx.executeSql("select Notes.id, title, note, date, label_id, labels.name as label_name, labels.color as label_color from Notes INNER JOIN labels ON labels.id = Notes.label_id", [], (_, { rows }) => {
+            tx.executeSql("select Notes.id, title, type, note, date, label_id, labels.name as label_name, labels.color as label_color from Notes INNER JOIN labels ON labels.id = Notes.label_id", [], (_, { rows }) => {
               let NotesList = [];
               for(let i in rows['_array']){
                 let data = rows['_array'][i]
                 NotesList = [...NotesList,{
                     id:data.id, 
+                    type:data.type,
                     title:data.title, 
                     note:data.note, 
                     date:data.date, 
@@ -55,7 +56,7 @@ export default function Notes({ navigation }) {
     }
 
     const navigateWithData = (route,data) => {
-        navigation.navigate(route,data);
+        navigation.push(route,data);
     }
 
     return(
@@ -103,7 +104,7 @@ export default function Notes({ navigation }) {
             </ScrollView>
 
             {/* Add Notes Button */}
-            <TouchableOpacity style={styles.floatingBtn} onPress={()=>{setModalVisible(true)}}>
+            <TouchableOpacity style={styles.floatingBtn} onPress={()=>{navigate('Add')}}>
                 <View  style={styles.addWrapper}>
                     <Icon name='add' size={30} style={styles.icon}/>
                 </View>
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-evenly',
         flexWrap:'wrap',
-        marginHorizontal:10
+        marginHorizontal:10,
     }, 
     addWrapper:{
         width:50,

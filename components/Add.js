@@ -3,8 +3,10 @@ import { Pressable, StyleSheet, Text, View, TextInput, Modal} from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Icon2 from 'react-native-vector-icons/Ionicons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import SelectLabelModal from './SelectLabelModal';
 
+import TaskNote from './TaskNote'
 // Database
 import * as SQLite from "expo-sqlite";
 const db = SQLite.openDatabase("db.db");
@@ -15,7 +17,8 @@ export default function Add({ route,navigation }) {
     
     if(route.params){
         const { Note } = route.params;
-        data = {Title:Note.title, text:Note.note, Label:Note.label}
+        const type = (Note.type==="Note")?0:1
+        data = {Title:Note.title, text:Note.note, Label:Note.label, Type:type}
     }
 
     const [Title, setTitle] = useState(data.Title)
@@ -23,6 +26,10 @@ export default function Add({ route,navigation }) {
     const [Labels, setLabels] = useState([]);
     const [Label, setLabel] = useState({id:data.Label.id,name:data.Label.name,color:data.Label.color});
     const [modalVisible, setModalVisible] = useState(false);
+    const [Type, setType] = useState(data.Type)
+    // false: note
+    // true : task
+    const [tasks, setTasks] = useState([])    
 
     const fetch = () =>{
         db.transaction(
@@ -44,8 +51,17 @@ export default function Add({ route,navigation }) {
     }
 
     const addNote = () => {
+
+        let type = 'Note';
+        let note = text;
+
+        if(Type===true){
+            type = 'Task';
+            note = JSON.stringify(tasks)
+        }
+
         db.transaction((tx) => {
-            tx.executeSql("INSERT into Notes (title, note, date, label_id) values (?, ?, ?, ?)",[Title,text,'Dec 21, 2021',Label.id])
+            tx.executeSql("INSERT into Notes (type, title, note, date, label_id) values (?, ?, ?, ?, ?)",[type,Title,note,'Dec 21, 2021',Label.id])
             },
             (err)=>console.log(err),
             ()=>console.log('Done')
@@ -66,7 +82,7 @@ export default function Add({ route,navigation }) {
 
             <View style={styles.titleBar}>
                 <View style={{flexDirection:'row'}}>
-                    <Pressable style={styles.btn} onPress={()=>navigation.navigate('Home')}>
+                    <Pressable style={styles.btn} onPress={()=>navigation.push('Home')}>
                         <Icon name='left' size={25} style={styles.icon}/>
                     </Pressable>
                     {Label!=='' &&
@@ -80,9 +96,16 @@ export default function Add({ route,navigation }) {
                 </View>
 
                 <View style={{flexDirection:'row'}}>
-                    <Pressable style={[styles.btn,{marginRight:5}]} onPress={()=>{setModalVisible(!modalVisible);}}>
-                        <Icon2 name='pricetag-outline' size={24} style={styles.icon}/>
+                {(Type === false) 
+                    ?
+                    <Pressable style={[styles.btn,{marginRight:5}]} onPress={()=>{setType(!Type);}}>
+                        <FontAwesome5 name='tasks' size={24} style={styles.icon}/>
                     </Pressable>
+                    :
+                    <Pressable style={[styles.btn,{marginRight:5, backgroundColor:'#ccc'}]} onPress={()=>{setType(!Type);}}>
+                        <FontAwesome5 name='tasks' size={24} style={{color:'#303030'}}/>
+                    </Pressable>
+                }
                     <Pressable style={styles.btn} onPress={()=>addNote()}>
                         <Icon name='save' size={28} style={styles.icon}/>
                     </Pressable>
@@ -93,16 +116,22 @@ export default function Add({ route,navigation }) {
                 <TextInput placeholderTextColor='#ccc' maxLength={15} value={Title} placeholder='Untitled' onChangeText={(text)=>setTitle(text)} style={styles.NoteTitle}/>
                 <Text style={styles.date}>December 22, 2021</Text>
 
-                <TextInput
-                    multiline
-                    editable
-                    value={text}
-                    placeholder='Note'
-                    onChangeText={(text)=>setText(text)}
-                    style={styles.Note}
-                    placeholderTextColor='#ccc'
-                />
+                {Type===false 
+                    ?
+                    <TextInput multiline editable value={text} placeholder='Note' onChangeText={(text)=>setText(text)} style={styles.Note} placeholderTextColor='#ccc'/>
+                    :
+                    <TaskNote tasks={tasks} setTasks={setTasks}/>
+                }
             </View>
+
+            {/* <View style={styles.bottomBar}>
+                <Pressable style={[styles.btn,{marginRight:5}]} onPress={()=>{setModalVisible(!modalVisible);}}>
+                    <Icon name='delete' size={24} style={styles.icon}/>
+                </Pressable>
+                <Pressable style={styles.btn} onPress={()=>{setModalVisible(!modalVisible);}}>
+                    <Icon2 name='pricetag-outline' size={24} style={styles.icon}/>
+                </Pressable>
+            </View> */}
         </SafeAreaView>   
     )
 }
@@ -187,6 +216,17 @@ const styles = StyleSheet.create({
     labelIcon:{
         color:'#303030', 
         marginRight:5
-    }
+    },
+    bottomBar:{
+        flexDirection:'row',
+        margin:15,
+    },
+    circle:{
+        width:20,
+        height:20,
+        backgroundColor:'crimson',
+        borderRadius:12,
+        marginRight:15,
+    },
     
 });

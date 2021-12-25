@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import { Pressable, StyleSheet, Text, View} from 'react-native';
 
 export default function NoteItem(props) {
+    if(props.item.type==='Note')
     return(
         <Pressable style={[styles.note,{backgroundColor:props.item.label.color}]} onLongPress={()=>{props.deleteModal(true)}} onPress={()=>{props.navigate('Add',{Note:props.item})}}>
             <Text style={styles.noteTitle}>{props.item.title}</Text>
@@ -12,6 +13,28 @@ export default function NoteItem(props) {
             </View>
         </Pressable>
     )
+    else{
+        let Task = JSON.parse(props.item.note)
+        let Done = 0;
+        let Undone = Task.length;
+
+        for( let i in Task){
+            if(Task[i].done === 1)Done+=1;
+        }
+
+
+        return(
+            <Pressable style={[styles.note,{backgroundColor:props.item.label.color}]} onLongPress={()=>{props.deleteModal(true)}} onPress={()=>{props.navigate('Add',{Note:props.item})}}>
+                <Text style={styles.noteTitle}>{props.item.title}</Text>
+                    <Text style={styles.noteTask}>{Done+'/'+Undone+' Done'}</Text>                    
+
+                    <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:5}}>
+                        <Text style={styles.noteDate}>{props.item.label.name}</Text>
+                        <Text style={styles.noteDate}>{props.item.date}</Text>
+                    </View>
+            </Pressable>
+        )
+    }
 }
 
 const styles = StyleSheet.create({
@@ -39,6 +62,10 @@ const styles = StyleSheet.create({
     },
     noteDate:{
         opacity:0.3,
+        fontWeight:'bold'
+    },
+    noteTask:{
+        opacity:0.5,
         fontWeight:'bold'
     },
 });
